@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# mac crap
+.DS_Store
+data/.DS_Store
+
+# data too large for github
+data/lyrics/lyrics-data.csv
