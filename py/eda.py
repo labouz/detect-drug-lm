@@ -48,38 +48,27 @@ drug_names = drug_names[drug_names.category != 'Unknown']
 drug_cats = drug_names['category'].tolist()
 drug_cats = list(set(drug_cats))
 drug_syns = drug_names['synonym'].tolist()
-drug_ls = drug_cats + drug_syns
+
 # --------------------
 # TEST with MARIJUANA
 # see how many lyrics contain marijuana
-# lyrics_clean['hasDrug'] = lyrics_clean['lyrics'].str.contains('marijuana', case=False)
-# # proportion of lyrics with marijuana - 232/191582
-# lyrics_clean['hasDrug'].value_counts()
+lyrics_clean['hasDrug'] = lyrics_clean['lyrics'].str.contains('marijuana', case=False)
+# proportion of lyrics with marijuana - 232/191582
+lyrics_clean['hasDrug'].value_counts()
 # --------------------
 
 # check if lyrics contain any values in either drug_cats or drug_syns lists
-lyrics_clean['hasDrug'] = lyrics_clean['lyrics'].str.contains('|'.join(drug_ls), case=False)
-# makes everything true!!!
+lyrics_clean['hasDrug'] = lyrics_clean['lyrics'].str.contains('|'.join(drug_cats), case=False) #takes too long
 
-# 
-for i in range(len(lyrics_clean)):
-    if lyrics_clean['lyrics'].iloc[i] in drug_ls:
-        lyrics_clean['hasDrug'].iloc[i] = True
-    else:
-        lyrics_clean['hasDrug'].iloc[i] = False
+# alternate method
+for drug in drug_cats:
+    lyrics_clean['hasDrug'] = lyrics_clean['lyrics'].str.contains(drug, case=False)
+    if lyrics_clean['hasDrug'].any():
+        break
+# returns only 25 Trues when we know marijuana alone returns 232 true values- something is wrong
 
-# remove hasdrug column
-lyrics_clean = lyrics_clean.drop(columns=['hasDrug'])
 
-# try again
-# lyrics_clean['hasDrug'] = any(l in lyrics_clean['lyrics'] for l in drug_ls) NOT WORKING
-
-# try again
-# check if the variable lyrics has any values in the drug_ls list
-for i in range(len(lyrics_clean)):
-    if any(l in lyrics_clean['lyrics'].iloc[i] for l in drug_ls):
-        lyrics_clean['hasDrug'].iloc[i] = True
-    else:
-        lyrics_clean['hasDrug'].iloc[i] = False # No - takes too long to run
-        
-# try again
+# set hasDrug to 1 if the song contains a drug reference
+# for i in range(len(lyrics_clean)):
+#     if lyrics_clean.iloc[i, 0] in drug_names.synonym.values:
+#         lyrics_clean.iloc[i, 1] = 1
