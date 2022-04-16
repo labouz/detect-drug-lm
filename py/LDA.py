@@ -101,6 +101,10 @@ texts = data_words
 # Term Document Frequency
 corpus = [id2word.doc2bow(text) for text in texts]
 
+# calculate tf-idf
+from gensim.models import TfidfModel
+tfidf = TfidfModel(corpus)
+
 
 ## LDA ------------------------------------------------------------------------
 from pprint import pprint
