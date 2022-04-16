@@ -8,7 +8,6 @@
 # load packages
 import pandas as pd
 import numpy as np
-import pyreadr as pr
 
 # read data
 lyrics = pd.read_csv('detect-drug-lm/data/lyrics/lyrics-data.csv')
@@ -68,8 +67,9 @@ extra_stopwords = ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 
                          "haven't", 'isn', "isn't", 'ma', 'mightn', "mightn't", 'mustn', "mustn't", 'needn',
                          "needn't", 'shan', "shan't", 'shouldn', "shouldn't", 'wasn', "wasn't", 'weren', "weren't",
                          'won', "won't", 'wouldn', "wouldn't", 'dont', 'didnt', 'doesnt', 'cause', 'cant', 'couldnt', 'im',
-                         'youre', 'oh', 'wont', 'ill', 'ive', 'hes', 'thats', 'whos', 'whats', 'youd', 'youve', 'youll',]
-
+                         'youre', 'oh', 'wont', 'ill', 'ive', 'hes', 'thats', 'whos', 'whats', 'youd', 'youve', 'youll',
+                   'shouldve', 'chorus', 'lyrics', 'ooh', 'oooh', 'aint', 'verse', 'nah', 'ooo', 'ohoh', 'mm', 'woa', 'woah', 'woo',
+                   'huh', 'hmm', 'ohh', 'mm', 'uh', 'whoa', 'cuz', 'ya']
 all_stopwords = stopwords.union(extra_stopwords)
 def sent_to_words(sentences):
     for sentence in sentences:
@@ -93,17 +93,50 @@ data_words = remove_stopwords(data_words)
 # wordcloud.to_image()
 
 # TDF -------------------------------------------------------------------------
-import gensim.corpora as corpora
-# Create Dictionary
-id2word = corpora.Dictionary(data_words)
-# Create Corpus
-texts = data_words
-# Term Document Frequency
-corpus = [id2word.doc2bow(text) for text in texts]
 
-# calculate tf-idf
-from gensim.models import TfidfModel
-tfidf = TfidfModel(corpus)
+
+# calculate tf-idf with sklearn
+import sklearn
+from sklearn.feature_extraction.text import TfidfVectorizer
+tfidf = TfidfVectorizer(max_features=5000, min_df=5, max_df=0.7, stop_words=stopwords.union(extra_stopwords))
+tfidf_matrix = tfidf.fit_transform(data)
+
+feature_names = tfidf.get_feature_names()
+
+# use tf-idf to summarize the important words per document
+from sklearn.metrics.pairwise import cosine_similarity
+dist = 1 - cosine_similarity(tfidf_matrix)
+
+
+# corpus_index = [n for n in corpus]
+# import pandas as pd
+# df = pd.DataFrame(tfs.T.todense(), index=feature_names, columns=corpus_index)
+# print(df)
+
+
+
+# gensim approach----------------------------------------------------------------
+# import gensim.corpora as corpora
+# # Create Dictionary
+# id2word = corpora.Dictionary(data_words)
+# # Create Corpus
+# texts = data_words
+# # Term Document Frequency
+# corpus = [id2word.doc2bow(text) for text in texts]
+# from gensim.models import TfidfModel
+# tfidf = TfidfModel(corpus)
+# # apply tf-idf to the corpus
+# tfidf_corpus = tfidf[corpus]
+# # from tf-idf to a matrix
+# import numpy as np
+# tfidf_matrix = np.zeros((len(corpus), len(id2word)))
+# for i, c in enumerate(corpus):
+#     for j, (id, val) in enumerate(c):
+#         tfidf_matrix[i, j] = val
+
+# extract importance of words
+# importance = tfidf.get_tfidf_feature_names()
+# print(importance)
 
 
 ## LDA ------------------------------------------------------------------------
